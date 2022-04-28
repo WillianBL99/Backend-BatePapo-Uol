@@ -1,22 +1,61 @@
-const participants = {
-    post: (req, res, db) => {
-        const {name} = req.body;
-    
-        if(!name || typeof(name) !== 'string'){
-            res.sendStatus(422);
-    
-        } else {
-            db.collection("users").insertOne({
-                name
-            })
-            res.send(name);
-        }
-    },
-    get: (req, res, db) => {
-        db.collection("users").find().toArray().then(users => {
-            res.send(users);
-        });
+import Dayjs from 'dayjs'
+import { MongoClient } from 'mongodb'
+
+const postParticipants = async (req, res) => {
+  const { name } = req.body
+  const mongoClient = new MongoClient(process.env.MONGO_URI)
+
+  if (!name || typeof name !== 'string') {
+    res.sendStatus(422)
+  } else {
+    try {
+      await mongoClient.connect()
+      const db = mongoClient.db(process.env.MONGO_DB)
+      console.log(await db.collection('users').findOne({ name: name }))
+      if (await db.collection('users').findOne({ name: name })) {
+        console.log('erro')
+        res.sendStatus(409)
+        return
+      }
+
+      await db.collection('users').insertOne({
+        name,
+        lastStatus: Date.now(),
+      })
+
+      await db.collection('messages').insertOne({
+        from: name,
+        to: 'Todos',
+        text: 'entra na sala...',
+        type: 'status',
+        time: Dayjs().format('HH:MM:SS'),
+      })
+
+      mongoClient.close()
+      res.sendStatus(201)
+    } catch (e) {
+      mongoClient.close()
     }
+  }
 }
 
-export default participants;
+const getParticipants = async (req, res) => {
+  const mongoClient = new MongoClient(process.env.MONGO_URI)
+  try {
+    await mongoClient.connect()
+    const db = mongoClient.db(process.env.MONGO_DB)
+    const users = await db.collection('users').find({}).toArray()
+    mongoClient.close()
+    res.send(users)
+  } catch (e) {
+    mongoClient.close()
+    res.send('erro na conxão')
+  }
+}
+
+const Participants = {
+  post: postParticipants,
+  get: getParticipants,
+}
+
+export default Participants
