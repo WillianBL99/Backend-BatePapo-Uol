@@ -11,8 +11,8 @@ const postParticipants = async (req, res) => {
     try {
       await mongoClient.connect()
       const db = mongoClient.db(process.env.MONGO_DB)
+
       if (await db.collection('users').findOne({ name: name })) {
-        console.log('erro')
         res.sendStatus(409)
         return
       }
@@ -33,6 +33,7 @@ const postParticipants = async (req, res) => {
       mongoClient.close()
       res.sendStatus(201)
     } catch (e) {
+      res.status(404).send(e)
       mongoClient.close()
     }
   }

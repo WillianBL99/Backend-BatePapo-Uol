@@ -1,6 +1,7 @@
 import express, { json } from 'express'
 import Participants from './Routes/participants.js'
 import Messages from './Routes/messages.js'
+import Status from './Routes/status.js'
 import dotenv from 'dotenv'
 import cors from 'cors'
 dotenv.config()
@@ -21,7 +22,4 @@ app.post('/messages', Messages.post)
 
 app.get('/messages', Messages.get)
 
-app.post('/status', (req, res) => {
-  // FIXME
-  res.send('status')
-})
+app.post('/status', Status.post)
