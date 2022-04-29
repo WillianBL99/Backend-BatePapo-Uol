@@ -2,6 +2,7 @@ import express, { json } from 'express'
 import Participants from './Routes/participants.js'
 import Messages from './Routes/messages.js'
 import Status from './Routes/status.js'
+import CheckServer from './Helpers/checkServer.js'
 import dotenv from 'dotenv'
 import cors from 'cors'
 dotenv.config()
@@ -13,6 +14,8 @@ app.use(cors())
 app.listen(process.env.PORT, () => {
   console.log('runing')
 })
+
+CheckServer()
 
 app.post('/participants', Participants.post)
 

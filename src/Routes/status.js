@@ -16,7 +16,7 @@ const Status = {
       await db
         .collection('users')
         .updateOne({ name: user }, { $set: { lastStatus: Date.now() } })
-      res.sendStatus(201)
+      res.sendStatus(200)
       mongoClient.close()
     } catch (e) {
       res.status(400).send(e)
