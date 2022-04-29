@@ -19,10 +19,7 @@ app.get('/participants', Participants.get)
 
 app.post('/messages', Messages.post)
 
-app.get('/messages', (req, res) => {
-  // FIXME
-  res.send('messages')
-})
+app.get('/messages', Messages.get)
 
 app.post('/status', (req, res) => {
   // FIXME
