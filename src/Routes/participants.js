@@ -11,7 +11,6 @@ const postParticipants = async (req, res) => {
     try {
       await mongoClient.connect()
       const db = mongoClient.db(process.env.MONGO_DB)
-      console.log(await db.collection('users').findOne({ name: name }))
       if (await db.collection('users').findOne({ name: name })) {
         console.log('erro')
         res.sendStatus(409)
@@ -28,7 +27,7 @@ const postParticipants = async (req, res) => {
         to: 'Todos',
         text: 'entra na sala...',
         type: 'status',
-        time: Dayjs().format('HH:MM:SS'),
+        time: Dayjs().format('HH:mm:ss'),
       })
 
       mongoClient.close()
