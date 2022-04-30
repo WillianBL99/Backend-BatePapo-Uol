@@ -1,17 +1,14 @@
 import Dayjs from 'dayjs'
-import { MongoClient } from 'mongodb'
+import ConnectDB from '../Models/connect_db.js'
 
 const postParticipants = async (req, res) => {
+  const { db, connection } = await ConnectDB()
   const { name } = req.body
-  const mongoClient = new MongoClient(process.env.MONGO_URI)
 
   if (!name || typeof name !== 'string') {
     res.sendStatus(422)
   } else {
     try {
-      await mongoClient.connect()
-      const db = mongoClient.db(process.env.MONGO_DB)
-
       if (await db.collection('users').findOne({ name: name })) {
         res.sendStatus(409)
         return
@@ -30,26 +27,24 @@ const postParticipants = async (req, res) => {
         time: Dayjs().format('HH:mm:ss'),
       })
 
-      mongoClient.close()
       res.sendStatus(201)
+      connection.close()
     } catch (e) {
-      res.status(404).send(e)
-      mongoClient.close()
+      res.status(500).send(e)
+      connection.close()
     }
   }
 }
 
 const getParticipants = async (req, res) => {
-  const mongoClient = new MongoClient(process.env.MONGO_URI)
+  const { db, connection } = await ConnectDB()
   try {
-    await mongoClient.connect()
-    const db = mongoClient.db(process.env.MONGO_DB)
     const users = await db.collection('users').find({}).toArray()
-    mongoClient.close()
     res.send(users)
+    connection.close()
   } catch (e) {
-    mongoClient.close()
-    res.send('erro na conxão')
+    res.status(500).send(e)
+    connection.close()
   }
 }
 

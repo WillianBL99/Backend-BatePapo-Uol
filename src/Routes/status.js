@@ -1,11 +1,9 @@
 import { MongoClient } from 'mongodb'
+import ConnectDB from '../Models/connect_db.js'
 
 const Status = {
   post: async (req, res) => {
-    const mongoClient = new MongoClient(process.env.MONGO_URI)
-    await mongoClient.connect()
-    const db = mongoClient.db(process.env.MONGO_DB)
-
+    const { db, mongoClient } = await ConnectDB()
     const user = req.header('User')
 
     try {
