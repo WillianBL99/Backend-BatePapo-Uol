@@ -4,10 +4,24 @@ import isOnline from '../Helpers/isOline.js'
 import Dayjs from 'dayjs'
 
 const getMessage = async (req, res) => {
+  const { limit } = req.query
   const { db, connection } = await ConnectDB()
+
   try {
-    const messages = await db.collection('messages').find({}).toArray()
-    res.send(messages)
+    const messages = db.collection('messages')
+    if (limit) {
+      console.log('tempage', limit)
+      const rangeMessages = await messages
+        .find()
+        .sort({ _id: -1 })
+        .limit(parseInt(limit))
+        .toArray()
+      res.send(rangeMessages)
+    } else {
+      const allMessages = await messages.find().toArray()
+      res.send(allMessages)
+    }
+
     connection.close()
   } catch (e) {
     res.status(500).send(e)
