@@ -1,13 +1,7 @@
 import ConnectDB from '../Models/connect_db.js'
 import messageSchema from '../Helpers/messageSchema.js'
+import isOnline from '../Helpers/isOline.js'
 import Dayjs from 'dayjs'
-
-const isOnline = async (db, name) => {
-  const users = db.collection('users')
-  const user = await users.findOne({ name })
-  if (user) return true
-  return false
-}
 
 const getMessage = async (req, res) => {
   const { db, connection } = await ConnectDB()
@@ -33,7 +27,7 @@ const postMessage = async (req, res) => {
 
     if (validate.error) {
       res.status(422).send(validate.error)
-    } else if (!(await isOnline(db, message.from))) {
+    } else if (!(await isOnline(db, from))) {
       res.status(422).send('User is offline')
       connection.close()
       return
