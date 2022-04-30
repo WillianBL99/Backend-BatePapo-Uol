@@ -1,5 +1,13 @@
 import ConnectDB from '../Models/connect_db.js'
+import messageSchema from '../Helpers/messageSchema.js'
 import Dayjs from 'dayjs'
+
+const isOnline = async (db, name) => {
+  const users = db.collection('users')
+  const user = await users.findOne({ name })
+  if (user) return true
+  return false
+}
 
 const getMessage = async (req, res) => {
   const { db, connection } = await ConnectDB()
@@ -15,33 +23,31 @@ const getMessage = async (req, res) => {
 
 const postMessage = async (req, res) => {
   const { db, connection } = await ConnectDB()
+
+  const message = req.body
   const from = req.header('User')
-  const { to, text, type } = req.body
   const time = Dayjs().format('HH:mm:ss')
 
   try {
-    const isUserConnected = await db.collection('users').findOne({ name: from })
-    if (
-      !to ||
-      !text ||
-      (type !== 'message' && type !== 'private_message') ||
-      !isUserConnected
-    ) {
-      res.sendStatus(422)
-      return
-    } else {
-      await db.collection('messages').insertOne({
-        from,
-        to,
-        text,
-        type,
-        time,
-      })
-      res.sendStatus(201)
+    const validate = messageSchema.validate(message)
+
+    if (validate.error) {
+      res.status(422).send(validate.error)
+    } else if (!(await isOnline(db, message.from))) {
+      res.status(422).send('User is offline')
       connection.close()
+      return
     }
+
+    await db.collection('messages').insertOne({
+      from,
+      ...message,
+      time,
+    })
+    res.sendStatus(201)
+    connection.close()
   } catch (e) {
-    res.send('deu ruim')
+    res.status(500).send(e)
     connection.close()
   }
 }
