@@ -1,25 +1,29 @@
 import ConnectDB from '../Models/connect_db.js'
 import messageSchema from '../Helpers/messageSchema.js'
 import isOnline from '../Helpers/isOline.js'
+import filterMessages from '../Helpers/filterMessages.js'
 import Dayjs from 'dayjs'
 
 const getMessage = async (req, res) => {
   const { limit } = req.query
+  const user = req.header('User')
   const { db, connection } = await ConnectDB()
 
   try {
     const messages = db.collection('messages')
+
     if (limit) {
       console.log('tempage', limit)
       const rangeMessages = await messages
-        .find()
+        .find(filterMessages(user))
         .sort({ _id: -1 })
         .limit(parseInt(limit))
         .toArray()
-      res.send(rangeMessages)
+
+      res.send(rangeMessages.reverse())
     } else {
-      const allMessages = await messages.find().toArray()
-      res.send(allMessages)
+      console.log(user, 'user')
+      res.send(await messages.find(filterMessages(user)).toArray())
     }
 
     connection.close()
