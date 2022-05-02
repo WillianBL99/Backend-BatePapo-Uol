@@ -1,5 +1,5 @@
 import Dayjs from 'dayjs'
-import isOnline from '../Helpers/isOline.js'
+import isUserOnline from '../Helpers/isUserOnline.js'
 import ConnectDB from '../Models/connect_db.js'
 
 const postParticipants = async (req, res) => {
@@ -10,7 +10,7 @@ const postParticipants = async (req, res) => {
     res.sendStatus(422)
   } else {
     try {
-      if (await isOnline(db, name)) {
+      if (await isUserOnline(db, name)) {
         res.sendStatus(409)
         return
       }

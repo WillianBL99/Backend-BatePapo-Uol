@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import messageSchema from '../Helpers/messageSchema.js'
-import isOnline from '../Helpers/isOline.js'
+import isUserOnline from '../Helpers/isUserOnline.js'
 import filterMessages from '../Helpers/filterMessages.js'
 import ConnectDB from '../Models/connect_db.js'
 import Dayjs from 'dayjs'
@@ -34,7 +34,6 @@ const getMessage = async (req, res) => {
 
 const postMessage = async (req, res) => {
   const { db, connection } = await ConnectDB()
-
   const message = req.body
   const from = req.header('User')
   const time = Dayjs().format('HH:mm:ss')
@@ -44,7 +43,7 @@ const postMessage = async (req, res) => {
 
     if (validate.error) {
       res.status(422).send(validate.error)
-    } else if (!(await isOnline(db, from))) {
+    } else if (!(await isUserOnline(db, from))) {
       res.status(422).send('User is offline')
       connection.close()
       return
@@ -64,11 +63,8 @@ const postMessage = async (req, res) => {
 }
 
 const deleteMessage = async (req, res) => {
-  console.log('chamou')
   const user = req.header('User')
   const { idMessage } = req.params
-  console.log(idMessage)
-
   const { db, connection } = await ConnectDB()
 
   try {
@@ -77,10 +73,8 @@ const deleteMessage = async (req, res) => {
     const [message] = await messages
       .find({ _id: new ObjectId(idMessage) })
       .toArray()
-    console.log(message, 'from')
 
     if (!message) {
-      console.log('errão')
       res.sendStatus(404)
       return
     } else if (message.from !== user) {
