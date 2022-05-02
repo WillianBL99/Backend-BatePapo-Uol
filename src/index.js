@@ -25,4 +25,9 @@ app.post('/messages', Messages.post)
 
 app.get('/messages', Messages.get)
 
+app.delete('/messages/:idMessage', (req, res) => {
+  console.log('chamou delete')
+  Messages.delete(req, res)
+})
+
 app.post('/status', Status.post)

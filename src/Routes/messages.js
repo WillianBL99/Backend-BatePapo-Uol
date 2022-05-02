@@ -1,7 +1,8 @@
-import ConnectDB from '../Models/connect_db.js'
+import { ObjectId } from 'mongodb'
 import messageSchema from '../Helpers/messageSchema.js'
 import isOnline from '../Helpers/isOline.js'
 import filterMessages from '../Helpers/filterMessages.js'
+import ConnectDB from '../Models/connect_db.js'
 import Dayjs from 'dayjs'
 
 const getMessage = async (req, res) => {
@@ -13,7 +14,6 @@ const getMessage = async (req, res) => {
     const messages = db.collection('messages')
 
     if (limit) {
-      console.log('tempage', limit)
       const rangeMessages = await messages
         .find(filterMessages(user))
         .sort({ _id: -1 })
@@ -22,7 +22,6 @@ const getMessage = async (req, res) => {
 
       res.send(rangeMessages.reverse())
     } else {
-      console.log(user, 'user')
       res.send(await messages.find(filterMessages(user)).toArray())
     }
 
@@ -64,9 +63,44 @@ const postMessage = async (req, res) => {
   }
 }
 
+const deleteMessage = async (req, res) => {
+  console.log('chamou')
+  const user = req.header('User')
+  const { idMessage } = req.params
+  console.log(idMessage)
+
+  const { db, connection } = await ConnectDB()
+
+  try {
+    const messages = db.collection('messages')
+
+    const [message] = await messages
+      .find({ _id: new ObjectId(idMessage) })
+      .toArray()
+    console.log(message, 'from')
+
+    if (!message) {
+      console.log('errão')
+      res.sendStatus(404)
+      return
+    } else if (message.from !== user) {
+      res.sendStatus(401)
+      return
+    }
+
+    await messages.deleteOne({ _id: new ObjectId(idMessage) })
+    res.sendStatus(200)
+    connection.close()
+  } catch (e) {
+    res.status(500).send(e)
+    connection.close()
+  }
+}
+
 const Messages = {
   get: getMessage,
   post: postMessage,
+  delete: deleteMessage,
 }
 
 export default Messages
