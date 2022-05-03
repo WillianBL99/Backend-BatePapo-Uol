@@ -42,11 +42,15 @@ const postMessage = async (req, res) => {
   const time = Dayjs().format('HH:mm:ss')
 
   try {
-    const validate = messageSchema.validate(message, { abortEarly: false })
+    const { error } = messageSchema.validate(message, { abortEarly: false })
 
-    if (validate.error) {
-      res.status(422).send(validate.error)
-    } else if (!(await isUserOnline(db, from))) {
+    if (error) {
+      res.status(422).send(error.details.map((detail) => detail.message))
+      connection.close()
+      return
+    }
+
+    if (!(await isUserOnline(db, from))) {
       res.status(422).send('User is offline')
       connection.close()
       return

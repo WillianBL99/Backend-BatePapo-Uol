@@ -11,7 +11,7 @@ const postParticipants = async (req, res) => {
     const { error } = participantsSchema.validate(name)
 
     if (error) {
-      res.status(422).send(error)
+      res.status(422).send(error.details[0].message)
       return
     }
 
