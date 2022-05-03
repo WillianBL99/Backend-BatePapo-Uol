@@ -42,7 +42,7 @@ const postMessage = async (req, res) => {
   const time = Dayjs().format('HH:mm:ss')
 
   try {
-    const validate = messageSchema.validate(message)
+    const validate = messageSchema.validate(message, { abortEarly: false })
 
     if (validate.error) {
       res.status(422).send(validate.error)

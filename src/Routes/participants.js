@@ -1,39 +1,43 @@
 import Dayjs from 'dayjs'
 import isUserOnline from '../Helpers/isUserOnline.js'
+import participantsSchema from '../Helpers/participantsSchema.js'
 import ConnectDB from '../Models/connect_db.js'
 
 const postParticipants = async (req, res) => {
   const { db, connection } = await ConnectDB()
   const { name } = req.body
 
-  if (!name || typeof name !== 'string') {
-    res.sendStatus(422)
-  } else {
-    try {
-      if (await isUserOnline(db, name)) {
-        res.sendStatus(409)
-        return
-      }
+  try {
+    const { error } = participantsSchema.validate(name)
 
-      await db.collection('users').insertOne({
-        name,
-        lastStatus: Date.now(),
-      })
-
-      await db.collection('messages').insertOne({
-        from: name,
-        to: 'Todos',
-        text: 'entra na sala...',
-        type: 'status',
-        time: Dayjs().format('HH:mm:ss'),
-      })
-
-      res.sendStatus(201)
-      connection.close()
-    } catch (e) {
-      res.status(500).send(e)
-      connection.close()
+    if (error) {
+      res.status(422).send(error)
+      return
     }
+
+    if (await isUserOnline(db, name)) {
+      res.sendStatus(409)
+      return
+    }
+
+    await db.collection('users').insertOne({
+      name,
+      lastStatus: Date.now(),
+    })
+
+    await db.collection('messages').insertOne({
+      from: name,
+      to: 'Todos',
+      text: 'entra na sala...',
+      type: 'status',
+      time: Dayjs().format('HH:mm:ss'),
+    })
+
+    res.sendStatus(201)
+    connection.close()
+  } catch (e) {
+    res.status(500).send(e)
+    connection.close()
   }
 }
 
