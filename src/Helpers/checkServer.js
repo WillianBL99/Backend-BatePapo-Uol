@@ -1,5 +1,6 @@
+import chalk from 'chalk'
 import Dayjs from 'dayjs'
-import { MongoClient } from 'mongodb'
+import ConnectDB from '../Models/connect_db.js'
 const SECOND = 1000
 const INTERVAL = 15
 
@@ -17,9 +18,7 @@ const dropUser = async (db, name) => {
 
 const CheckServer = () => {
   setInterval(async () => {
-    const mongoClient = new MongoClient(process.env.MONGO_URI)
-    await mongoClient.connect()
-    const db = mongoClient.db(process.env.MONGO_DB)
+    const { db, connection } = await ConnectDB()
 
     try {
       const users = await db.collection('users').find({}).toArray()
@@ -33,10 +32,10 @@ const CheckServer = () => {
         }
       }
 
-      mongoClient.close()
+      connection.close()
     } catch (e) {
-      console.log('não vai analizar mais')
-      mongoClient.close()
+      console.log(chalk.bold.red('Error in checkServer'), e)
+      connection.close()
     }
   }, INTERVAL * SECOND)
 }

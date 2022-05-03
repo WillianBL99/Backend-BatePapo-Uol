@@ -9,7 +9,7 @@ const ConnectDB = async () => {
     mongoClient = new MongoClient(process.env.MONGO_URI)
     await mongoClient.connect()
     db = mongoClient.db(process.env.MONGO_DB)
-    console.log(chalk.blue.bold('Successful connection!'))
+    //console.log(chalk.blue.bold('Successful connection!'))
   } catch (e) {
     console.log(chalk.red.bold('Unsuccessful connection!'))
   }
@@ -17,7 +17,7 @@ const ConnectDB = async () => {
   const connection = {
     close: () => {
       mongoClient.close()
-      console.log(chalk.yellow.bold('Connection closed!'))
+      //console.log(chalk.yellow.bold('Connection closed!'))
     },
   }
 

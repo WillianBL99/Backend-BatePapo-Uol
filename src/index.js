@@ -5,6 +5,7 @@ import Status from './Routes/status.js'
 import CheckServer from './Helpers/checkServer.js'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import chalk from 'chalk'
 dotenv.config()
 
 const app = express()
@@ -12,7 +13,7 @@ app.use(json())
 app.use(cors())
 
 app.listen(process.env.PORT, () => {
-  console.log('runing')
+  console.log(chalk.bold.green('Server is running on port/5000'))
 })
 
 CheckServer()
@@ -26,5 +27,7 @@ app.post('/messages', Messages.post)
 app.get('/messages', Messages.get)
 
 app.delete('/messages/:idMessage', Messages.delete)
+
+app.put('/messages/:idMessage', Messages.update)
 
 app.post('/status', Status.post)
