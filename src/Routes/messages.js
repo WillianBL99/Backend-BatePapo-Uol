@@ -1,3 +1,5 @@
+/* eslint "comma-dangle": ["error", "never"] */
+
 import { ObjectId } from 'mongodb'
 import messageSchema from '../Helpers/messageSchema.js'
 import isUserOnline from '../Helpers/isUserOnline.js'
